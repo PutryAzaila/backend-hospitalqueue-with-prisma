@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import http from "http";
 import { initSocket } from "./socket";
 
+import authRoutes from "./routes/auth.routes";
+import userRoutes from "./routes/user.routes";
 import serviceRoutes from "./routes/service.routes";
 import patientRoutes from "./routes/patient.routes";
 import queueRoutes from "./routes/queue.routes";
@@ -34,6 +36,8 @@ app.get("/", (req, res) => {
   });
 });
 
+app.use("/api/users", userRoutes);
+app.use("/api/auth", authRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/patients", patientRoutes);
 app.use("/api/queues", queueRoutes);

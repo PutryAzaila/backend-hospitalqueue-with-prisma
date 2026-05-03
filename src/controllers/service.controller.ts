@@ -1,10 +1,6 @@
 import { Request, Response } from "express";
 import { ServiceService } from "../services/service.service";
 
-interface IdParam {
-  id: string;
-}
-
 export const ServiceController = {
   async getAll(req: Request, res: Response) {
     try {
@@ -15,9 +11,9 @@ export const ServiceController = {
     }
   },
 
-  async getById(req: Request<IdParam>, res: Response) {
+  async getById(req: Request, res: Response) {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params["id"] as string);
       const service = await ServiceService.getById(id);
 
       if (!service) {
@@ -45,9 +41,9 @@ export const ServiceController = {
     }
   },
 
-  async update(req: Request<IdParam>, res: Response) {
+  async update(req: Request, res: Response) {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params["id"] as string);
       const service = await ServiceService.update(id, req.body);
       res.json({ success: true, data: service, message: "Layanan berhasil diupdate" });
     } catch (error) {
@@ -55,9 +51,9 @@ export const ServiceController = {
     }
   },
 
-  async deactivate(req: Request<IdParam>, res: Response) {
+  async deactivate(req: Request, res: Response) {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params["id"] as string);
       await ServiceService.deactivate(id);
       res.json({ success: true, message: "Layanan berhasil dinonaktifkan" });
     } catch (error) {

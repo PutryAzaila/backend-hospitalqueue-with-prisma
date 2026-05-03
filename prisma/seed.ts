@@ -4,9 +4,8 @@ import bcrypt from "bcrypt";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Memulai proses seeding...");
+  console.log("Memulai proses seeding...");
 
-  // ─── Seed Layanan ─────────────────────────────────────────
   const services = [
     { name: "Pendaftaran", code: "PD", type: ServiceType.PENDAFTARAN },
     { name: "Poli Umum", code: "UM", type: ServiceType.POLI },
@@ -24,30 +23,32 @@ async function main() {
       create: service,
     });
   }
-  console.log("✅ Layanan berhasil di-seed");
+  console.log("Layanan berhasil di-seed");
 
-  // ─── Seed User Admin ───────────────────────────────────────
-  // Password di-hash dengan bcrypt sebelum disimpan ke database
   const hashedPassword = await bcrypt.hash("admin123", 10);
 
   await prisma.user.upsert({
     where: { email: "admin@hospital.local" },
-    update: {},
+    update: {
+      passwordHash: hashedPassword,
+      role: UserRole.SUPER_ADMIN,
+      isActive: true,
+    },
     create: {
       name: "Super Admin",
       email: "admin@hospital.local",
       passwordHash: hashedPassword,
       role: UserRole.SUPER_ADMIN,
     },
-  });
-  console.log("✅ User admin berhasil di-seed");
+  }); 
+  console.log("User admin berhasil di-seed");
 
-  console.log("🎉 Seeding selesai!");
+  console.log("Seeding selesai!");
 }
 
 main()
   .catch((e) => {
-    console.error("❌ Error saat seeding:", e);
+    console.error("Error saat seeding:", e);
     process.exit(1);
   })
   .finally(async () => {

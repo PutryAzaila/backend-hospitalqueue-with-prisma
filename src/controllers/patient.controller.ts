@@ -1,10 +1,6 @@
 import { Request, Response } from "express";
 import { PatientService } from "../services/patient.service";
 
-interface IdParam {
-  id: string;
-}
-
 export const PatientController = {
   async getAll(req: Request, res: Response) {
     try {
@@ -16,9 +12,9 @@ export const PatientController = {
     }
   },
 
-  async getById(req: Request<IdParam>, res: Response) {
+  async getById(req: Request, res: Response) {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params["id"] as string);
       const patient = await PatientService.getById(id);
 
       if (!patient) {
@@ -56,9 +52,9 @@ export const PatientController = {
     }
   },
 
-  async update(req: Request<IdParam>, res: Response) {
+  async update(req: Request, res: Response) {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params["id"] as string);
       const patient = await PatientService.update(id, req.body);
       res.json({ success: true, data: patient, message: "Data pasien berhasil diupdate" });
     } catch (error) {
