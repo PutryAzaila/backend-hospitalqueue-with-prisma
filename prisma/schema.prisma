@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN_PENDAFTARAN
+  SUSTER
+  DOKTER
+  FARMASI
+  LAB
+  DISPLAY_ONLY
+}
+
+enum Gender {
+  LAKI_LAKI
+  PEREMPUAN
+}
+
+enum ServiceType {
+  POLI
+  LAB
+  FARMASI
+  PENDAFTARAN
+  IGD
+}
+
+enum PriorityCategory {
+  NORMAL
+  LANSIA
+  IBU_HAMIL
+  DISABILITAS
+  ANAK_KECIL
+}
+
+enum QueueStatus {
+  WAITING
+  CALLED
+  SERVING
+  SKIPPED
+  FINISHED
+  CANCELLED
+  TRANSFERRED
+  NO_SHOW
+}
+
+enum QueueEventType {
+  CREATED
+  CALLED
+  SERVING
+  SKIPPED
+  FINISHED
+  CANCELLED
+  TRANSFERRED
+  NO_SHOW
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(ADMIN_PENDAFTARAN)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Patient {
+  id                  Int       @id @default(autoincrement())
+  medicalRecordNumber String    @unique
+  name                String
+  nik                 String?   @unique
+  birthDate           DateTime?
+  gender              Gender?
+  phone               String?
+  isActive            Boolean   @default(true)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  queues Queue[]
+}
+
+model Service {
+  id        Int         @id @default(autoincrement())
+  name      String
+  code      String      @unique
+  type      ServiceType
+  isActive  Boolean     @default(true)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  counters Counter[]
+  queues   Queue[]
+}
+
+model Counter {
+  id        Int      @id @default(autoincrement())
+  name      String
+  serviceId Int
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  service Service @relation(fields: [serviceId], references: [id])
+  queues  Queue[]
+}
+
+model Queue {
+  id               Int              @id @default(autoincrement())
+  queueNumber      String
+  patientId        Int
+  serviceId        Int
+  counterId        Int?
+  priorityCategory PriorityCategory @default(NORMAL)
+  priorityLevel    Int              @default(5)
+  status           QueueStatus      @default(WAITING)
+  notes            String?
+  calledAt         DateTime?
+  servingAt        DateTime?
+  finishedAt       DateTime?
+  cancelledAt      DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  patient Patient  @relation(fields: [patientId], references: [id])
+  service Service  @relation(fields: [serviceId], references: [id])
+  counter Counter? @relation(fields: [counterId], references: [id])
+  events  QueueEvent[]
+}
+
+model QueueEvent {
+  id        Int            @id @default(autoincrement())
+  queueId   Int
+  eventType QueueEventType
+  notes     String?
+  createdAt DateTime       @default(now())
+
+  queue Queue @relation(fields: [queueId], references: [id])
+}
